@@ -177,15 +177,16 @@ list<Nod*> deleteMinimDinArbore(Nod *tree)
 {
     list<Nod*> heap;
     Nod *temp = tree->child;
-    Nod *lo;
+    Nod *a;
 
     // making a binomial heap from Binomial Tree
+    // transformam arborele in heap
     while (temp)
     {
-        lo = temp;
+        a = temp;
         temp = temp->sibling;
-        lo->sibling = NULL;
-        heap.push_front(lo);
+        a->sibling = NULL;
+        heap.push_front(a);
     }
     return heap;
 }
