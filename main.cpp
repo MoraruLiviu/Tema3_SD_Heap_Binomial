@@ -5,7 +5,7 @@ ifstream in ("mergeheap.in");
 ofstream out ("mergeheap.out");
 
 
-/// Structura ce defineste nodul
+/// Definition of the node
 struct Nod
 {
     int valoare, grad;
@@ -21,15 +21,15 @@ Nod* newNod(int valoare)
     return temp;
 }
 
-/// Merge a 2 arbori binomiali
+/// Merge 2 binomial trees
 Nod* mergeBinomialTrees(Nod *b1, Nod *b2)
 {
-    // daca b1 > b2
+    // if b1 > b2
     if (b1->valoare > b2->valoare)
         swap(b1, b2);
 
-    // Facem ca arborele de valoare mai mare
-    // sa fie fiul celui cu valoare mai mica
+    // We make the higher value tree be the
+    // son of the lower value one
 
     b2->sibling = b1->child;
     b1->child = b2;
@@ -38,22 +38,22 @@ Nod* mergeBinomialTrees(Nod *b1, Nod *b2)
     return b1;
 }
 
-/// Functie pentru reuniune a doua heap-uri binomiale
+/// Function that unites 2 binomial heaps
 list<Nod*> unionBionomialHeap(list<Nod*> heap1, list<Nod*> heap2)
 {
-    // heap_nou va contine heap-ul dupa merge
+    // heap_nou will contaain the new heap after merging
     list<Nod*> heap_nou;
     list<Nod*>::iterator i1 = heap1.begin();
     list<Nod*>::iterator i2 = heap2.begin();
     while (i1!=heap1.end() && i2!=heap2.end())
     {
-        // daca gradul lui heap1 <= gradul lui heap2
+        // if the degree of heap1 <= the degree of heap2
         if((*i1)->grad <= (*i2)->grad)
         {
             heap_nou.push_back(*i1);
             i1++;
         }
-        // altfel (grad (heap1) > grad(heap2))
+        // otherwise (degree (heap1) > degree (heap2))
         else
         {
             heap_nou.push_back(*i2);
@@ -61,14 +61,14 @@ list<Nod*> unionBionomialHeap(list<Nod*> heap1, list<Nod*> heap2)
         }
     }
 
-    // verificam daca mai sunt elemente in heap1
+    // we check if there are any more elements in heap1
     while (i1 != heap1.end())
     {
         heap_nou.push_back(*i1);
         i1++;
     }
 
-    // verificam daca mai sunt elemente in heap2
+    //  we check if there are any more elements in heap2
     while (i2!=heap2.end())
     {
         heap_nou.push_back(*i2);
@@ -77,9 +77,9 @@ list<Nod*> unionBionomialHeap(list<Nod*> heap1, list<Nod*> heap2)
     return heap_nou;
 }
 
-// rearanjam heap-ul ca sa fie
-// in ordine crescatoare de grad si
-// sa nu existe doi arbori cu acelasi grad
+// we rearrange the heaps so that
+// they are ordered ascending by degree
+// and that there are no two trees with the same degree
 list<Nod*> adjust(list<Nod*> binomial_heap)
 {
     if (binomial_heap.size() <= 1)
@@ -102,11 +102,11 @@ list<Nod*> adjust(list<Nod*> binomial_heap)
     }
     while (it1 != binomial_heap.end())
     {
-        // daca decat un element trebuie procesat
+        // if only 1 element needs to be processed
         if (it2 == binomial_heap.end())
             it1++;
 
-        // Daca grad(it1) < grad(it2) se trece mai departe
+        // If grad(it1) < grad(it2) we move on
         else if ((*it1)->grad < (*it2)->grad)
         {
             it1++;
@@ -115,11 +115,10 @@ list<Nod*> adjust(list<Nod*> binomial_heap)
                 it3++;
         }
 
-        // daca gradul a trei arbori consecutivi din heap
-        // este acelasi se trece mai departe
-        // (trebuie ca numai ultimii doi sa fie reuniti
-        // daca dupa ei este un arbore de grad mai mare,
-        // astfel se pastreaza ordinea crescatoare de grad)
+        // if the degrees of 3 consecutive trees
+        // are the same we move on
+        // (only the last 2 trees of the same degree must be united
+        // so that the ascending order based on the degree is kept)
         else if (it3!=binomial_heap.end() &&
                 (*it1)->grad == (*it2)->grad &&
                 (*it1)->grad == (*it3)->grad)
@@ -129,9 +128,7 @@ list<Nod*> adjust(list<Nod*> binomial_heap)
             it3++;
         }
 
-        // daca gradul a doi arbori din heap este egal
-        // (am trecut de verificarea de 3 consecutivi deci
-        // e clar ca dupa ei urmeaza un arbore de grad mai mare)
+        // if the degree of 2 trees is the same
         else if ((*it1)->grad == (*it2)->grad)
         {
             *it1 = mergeBinomialTrees(*it1,*it2);
@@ -143,28 +140,25 @@ list<Nod*> adjust(list<Nod*> binomial_heap)
     return binomial_heap;
 }
 
-/// functie de insert arbore binomial in heap binomial
+/// function that inserts a tree in the heap
 list<Nod*> insertArboreinHeap(list<Nod*> binomial_heap,Nod *tree)
 {
-    // heap nou ce va fi returnat
+    // new heap
     list<Nod*> heap_nou;
 
-    // inseram arborele in heap
+    // we enter the tree in the new heap
     heap_nou.push_back(tree);
 
-    // facem reuniune
+    // we unite the 2 heaps
     heap_nou = unionBionomialHeap(binomial_heap,heap_nou);
 
-    // si adjust pentru a uni arborii de acelasi
-    // grad daca este cazul
+    // and merge if there's multiple trees with the same degree
     return adjust(heap_nou);
 }
 
-/// functie de inserare de valoare in heap
-// cea de mai inainte introduce un arbore
-// iar aceasta transforma o valoare intr-un
-// arbore de grad 0 si apeleaza functia de
-// insert ca arbore
+/// function for inserting a value in the heap
+// it makes the value in a tree and adds the tree
+// to the heap
 list<Nod*> insert(list<Nod*> binomial_heap, int valoare)
 {
     Nod *temp = newNod(valoare);
@@ -172,14 +166,14 @@ list<Nod*> insert(list<Nod*> binomial_heap, int valoare)
 }
 
 
-/// stergere minim din arbore binomial
+/// delete the minimum of a tree
 list<Nod*> deleteMinimDinArbore(Nod *tree)
 {
     list<Nod*> heap;
     Nod *temp = tree->child;
     Nod *a;
 
-    // transformam arborele in heap
+    // turn the tree into a heapp
     while (temp)
     {
         a = temp;
@@ -192,7 +186,7 @@ list<Nod*> deleteMinimDinArbore(Nod *tree)
 
 
 
-/// functie pentru cautarea minimului in heap
+/// function to find the minimum from a heap
 Nod* getMin(list<Nod*> binomial_heap)
 {
     list<Nod*>::iterator it = binomial_heap.begin();
@@ -206,18 +200,13 @@ Nod* getMin(list<Nod*> binomial_heap)
     return temp;
 }
 
-/// stergere minim din heap
-// folosesc functia de getMin pentru a gasi minimul
-// si pe cea de deleteMinimDinArbore pentru a
-// scoate minimul din arborele ce contine valoarea
-// minima
+/// delete the minimum from the heap
 list<Nod*> deleteMinim(list<Nod*> binomial_heap)
 {
     list<Nod*> heap_nou,lo;
     Nod *temp;
 
-    // temp va contine pointer la elementul cu valoarea minima
-    // din heap
+    // temp will point to the minimum element in the heap
     temp = getMin(binomial_heap);
     list<Nod*>::iterator it;
     it = binomial_heap.begin();
@@ -225,8 +214,8 @@ list<Nod*> deleteMinim(list<Nod*> binomial_heap)
     {
         if (*it != temp)
         {
-            // formam un alt heap din toti arborii
-            // fara cel ce contine minimul
+            // we make a new heap without the tree
+            // that has the minimum
             heap_nou.push_back(*it);
         }
         it++;
@@ -278,7 +267,7 @@ int main()
 
     binomial_heap = Build(binomial_heap ,N);
     Nod *temp = getMin(binomial_heap);
-    cout << "\nElement minim din heap "
+    cout << "\nThe minimum element in the heap "
          << temp->valoare << "\n";
     cout<<endl;
     binomial_heap = deleteMinim(binomial_heap);
